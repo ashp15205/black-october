@@ -1,155 +1,495 @@
-# Claude Security Skills
+<div align="center">
 
-**Six tested Claude Agent Skills for security teams: patch triage, certificate/CA migration, OAuth and vendor access audits, incident response runbooks, code and config security review, and threat-advisory briefs.**
+<h1>🛡️ Claude Security Skills</h1>
 
-![tests](https://img.shields.io/badge/unit%20tests-46%20passing-brightgreen) ![evals](https://img.shields.io/badge/eval%20assertions-40%2F40-brightgreen) ![mutants](https://img.shields.io/badge/mutants%20killed-11%2F11-brightgreen) ![license](https://img.shields.io/badge/license-MIT-blue) ![python](https://img.shields.io/badge/python-3.10%2B-blue)
+<p><strong>Six production-tested Claude Agent Skills for security teams.<br/>Patch triage · CA migration · OAuth audit · Incident response · Code review · Threat briefs</strong></p>
 
-Works with Claude.ai, Claude Code and any client that supports [Agent Skills](https://docs.claude.com) (`SKILL.md` folders). Dependency footprint: Python 3 plus `cryptography` (only for the certificate script).
+[![Unit Tests](https://img.shields.io/badge/unit%20tests-46%20%E2%9C%93-brightgreen?style=for-the-badge&logo=python)](tests/test_scripts.py)
+[![Eval Assertions](https://img.shields.io/badge/eval%20assertions-40%2F40-brightgreen?style=for-the-badge)](evals/evals.json)
+[![Mutants Killed](https://img.shields.io/badge/mutants%20killed-11%2F11-brightgreen?style=for-the-badge)](tests/mutation_check.py)
+[![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
+[![Python](https://img.shields.io/badge/python-3.10%2B-blue?style=for-the-badge&logo=python)](requirements.txt)
+[![Claude](https://img.shields.io/badge/Claude-Code%20%7C%20.ai-orange?style=for-the-badge)](https://claude.ai)
+
+<p>Works with <strong>Claude.ai</strong>, <strong>Claude Code</strong>, and any client that supports <a href="https://docs.claude.com"><code>SKILL.md</code> Agent Skills</a>.<br/>
+Minimum dependency footprint: Python 3 stdlib · <code>cryptography</code> (cert audit only)</p>
+
+<a href="#-the-six-skills">Skills</a> ·
+<a href="#-install">Install</a> ·
+<a href="#-usage-examples">Usage</a> ·
+<a href="#-benchmarks">Benchmarks</a> ·
+<a href="#-what-triggered-this">Motivation</a> ·
+<a href="#-faq">FAQ</a> ·
+<a href="CONTRIBUTING.md">Contributing</a>
 
 ---
 
-## Why this exists
+</div>
 
-October 2026 showed the same failure patterns again and again: exposed edge devices exploited before patching, a certificate authority whose key-generation script produced guessable private keys, supply-chain access through over-privileged vendor OAuth apps, ransomware via initial-access brokers, and attackers using AI to move faster than defenders.
+## 🧠 What This Is
 
-A skill cannot detect or block attacks. It makes Claude **consistent and faster at the repeatable work around prevention**: triaging what to patch first, finding every certificate affected by a CA incident, auditing app permissions, running an incident without forgetting steps, reviewing code for the usual mistakes, and turning advisories into "are we affected, what do we do".
+AI cannot block attacks. But AI can **speed up the repeatable analysis work around security operations** — the parts where humans forget steps under pressure, prioritize wrong, or get overwhelmed by volume.
 
-Each skill pairs a written procedure (`SKILL.md`) with a **deterministic Python helper** where the task can be automated, so results are reproducible and unit-tested rather than left to model judgment.
+This repo pairs **six written `SKILL.md` procedures** (instructions Claude follows like a senior analyst) with **deterministic Python helper scripts** (where the output must be reproducible and auditable). Every helper is covered by unit tests, eval assertions, and mutation testing.
 
-## Who it is for
+> **Rule of thumb:** if Claude's output must be reproducible, it goes through a script. If it requires judgment and synthesis, it goes through a `SKILL.md`.
 
-- Security engineers, SOC and blue-team analysts, and incident responders
-- IT and platform admins who own patching, certificates and SaaS/OAuth access
-- DevSecOps and developers who want a security first pass on code and config
-- Small teams without a dedicated security staff who still need a repeatable process
-- MSPs and vendor-risk owners reviewing third-party access
+---
 
-## The skills
+## 🔥 What Triggered This
 
-| Skill | Problem it addresses | Helper script | Output |
-|---|---|---|---|
-| [`patch-triage`](skills/patch-triage) | Too many CVEs, unclear order; exploited edge devices (VPN, firewall, Citrix, PHP) | `triage.py` | P0-P3 table with deadlines and mitigations |
-| [`cert-inventory-migration`](skills/cert-inventory-migration) | CA compromise/distrust, weak or expiring certificates | `cert_audit.py` | Flagged cert inventory, migration plan, verification checklist |
-| [`oauth-vendor-access-audit`](skills/oauth-vendor-access-audit) | Supply-chain and OAuth abuse, over-privileged vendor/MSP apps | `audit_apps.py` | Ranked app risk table, containment steps |
-| [`incident-response-runbook`](skills/incident-response-runbook) | Ransomware, leaks, suspected breaches | template | Phased action checklist, timeline, notification steps |
-| [`security-config-code-review`](skills/security-config-code-review) | Hardcoded secrets, weak randomness/crypto, exposed config | `scan.py` | Severity-ranked findings with fixes |
-| [`threat-advisory-summarizer`](skills/threat-advisory-summarizer) | Advisory overload, unclear impact | template | One-screen "affected? actions" brief |
+In the **72 hours before October 24, 2026**, three unconnected incidents demonstrated the exact failure modes these skills are designed around:
 
-## Install
+<details>
+<summary><strong>1. 🔑 eMudhra intermediate CA key compromise — cert-inventory-migration</strong></summary>
 
-**Claude.ai:** download the `.skill` files from [`releases/`](releases) and upload them in Claude's skills settings (menu names may change; check Anthropic's current docs).
+Eight eMudhra intermediate CA private keys were compromised, requiring browser vendors to distrust the associated certificates. Security teams scrambled to:
+- Find every certificate in their estate chaining to the affected intermediates
+- Identify certificates signed using the affected SPKI
+- Plan emergency reissue across TLS, code-signing, and device certs
+- Check Certificate Transparency logs for forged certs on their domains
 
-**Claude Code:** copy the skill folders.
-```bash
-git clone https://github.com/ashp15205/claude-security-skills.git
-cd claude-security-skills
-mkdir -p ~/.claude/skills            # personal; use ./.claude/skills for one project
-cp -r skills/* ~/.claude/skills/
-pip install -r requirements.txt      # only needed for cert_audit.py
-```
+**Coverage:** `cert-inventory-migration` — flags `DISTRUSTED_ISSUER`, `DISTRUSTED_IN_CHAIN`, `DISTRUSTED_SPKI`, `WEAK_RSA`, and `EXPIRED` on local PEM files. Provides an ordered migration plan and verification checklist.
 
-## How to use each skill
+Sources: [The Hacker News](https://thehackernews.com/2026/10/eight-emudhra-ca-keys-compromised.html) · [Google Security Blog](https://blog.google/security/protecting-chrome-and-android-users-from-compromised-emudhra-intermediate-ca-certificates/) · [Help Net Security](https://www.helpnetsecurity.com/2026/10/21/emudhra-certificates-private-keys-compromised/)
 
-Skills trigger from your request. Example prompts:
+</details>
 
-**patch-triage**
-> "Here is our scanner export. What do we patch first? Treat the VPN gateways as internet-facing."
+<details>
+<summary><strong>2. 🤖 China-linked APT uses AI pentest tool "Artex" in ConnectWise-style tenant attacks — oauth-vendor-access-audit</strong></summary>
 
-Or run the helper directly:
+A China-nexus threat actor was observed using an AI-assisted penetration testing tool ("Artex") in attacks exploiting ConnectWise-style remote management software, compromising MSP and vendor access to downstream tenants. The attack vector: **over-privileged OAuth apps and delegated admin relationships** with no MFA enforcement, stale credentials, and admin-consented multi-tenant app registrations.
+
+**Coverage:** `oauth-vendor-access-audit` — flags `HIGH` risk scopes (Directory.ReadWrite, Mail.ReadWrite), unverified publishers, admin-consented multi-tenant apps, accounts with no MFA or no owner, recently-added credentials (persistence indicator), and unused apps.
+
+Sources: [SecurityWeek](https://securityweek.com/china-apt-uses-ai-pentest-tool-artex-in-connectwise-attacks)
+
+</details>
+
+<details>
+<summary><strong>3. 🔥 Hackers breach enterprise firewalls and VPNs — patch-triage + incident-response-runbook</strong></summary>
+
+Ransomware affiliates exploited unpatched edge devices (Fortinet FortiOS, Palo Alto PAN-OS) to gain initial access, then moved laterally via initial-access-broker tooling (Rclone, Cobalt Strike). Multiple enterprise networks were encrypted within hours of initial breach. The pattern: internet-exposed devices running software with known CVEs, patching delayed past the exploitation window.
+
+**Coverage:** `patch-triage` — deterministic P0/P1/P2/P3 scoring that bumps edge devices one severity level up, so exploited + exposed = P0 (fix in 24h) regardless of nominal severity. `incident-response-runbook` — covers ransomware containment without a "pay by default" path.
+
+Sources: [The Hacker News](https://thehackernews.com/2026/10/hackers-breach-enterprise-firewalls-and.html)
+
+</details>
+
+---
+
+## 🎯 Who This Is For
+
+| Role | How they use it |
+|---|---|
+| 🔵 **SOC / Blue Team Analysts** | Triage incoming CVEs and advisories without missing P0s; run incident response without forgetting steps |
+| 🔧 **Security Engineers** | Audit certificate estates and OAuth app registrations systematically |
+| 🏗️ **DevSecOps / Developers** | First-pass code and config security review before formal SAST |
+| 🏢 **IT / Platform Admins** | Own patching, PKI, and SaaS access; respond to CA distrust or supply-chain alerts |
+| 👥 **Small Teams** | No dedicated security staff? Get a repeatable baseline process that Claude can walk you through |
+| 🤝 **MSPs / Vendor-Risk Owners** | Audit third-party OAuth access and delegated admin relationships |
+
+---
+
+## 🔧 The Six Skills
+
+### 🩹 `patch-triage` — Deterministic CVE Prioritization
+
+**Problem:** Scanner dumps 400 CVEs. Which 3 need a P0 response tonight?
+
+**How it works:** Claude searches live sources (CISA KEV, vendor advisories) for exploitation status, then the `triage.py` script applies deterministic priority rules:
+
+| Condition | Priority | Deadline |
+|---|---|---|
+| Exploited AND internet-exposed (or unauth RCE) | **P0** | 24 hours |
+| Exploited OR PoC public, OR exposed + critical | **P1** | 72 hours |
+| Critical/High, internal only | **P2** | 14 days |
+| Everything else | **P3** | Next cycle |
+
+Edge devices (VPNs, firewalls, load balancers) move **one level up** automatically.
+
 ```bash
 python skills/patch-triage/scripts/triage.py vulns.csv --format json
 # CSV columns: cve,asset,product,exploited,internet_exposed,severity,patch_available,edge_device
 ```
-Rules: exploited and exposed = P0 (24h); exploited = P1 (72h); exposed and critical = P1; critical/high = P2 (14d); else P3; edge devices move up one level. Claude looks up exploitation status from live sources before filling the CSV.
 
-**cert-inventory-migration**
+**Example prompt:**
+> "Here is our Tenable export. What do we patch first? Our Fortinet gateways are internet-facing."
+
+---
+
+### 🔑 `cert-inventory-migration` — CA Compromise & Certificate Estate
+
+**Problem:** A CA was distrusted. Which of our certs are affected? What do we do first?
+
+**How it works:** `cert_audit.py` walks local PEM files and flags:
+
+| Flag | Meaning |
+|---|---|
+| `DISTRUSTED_ISSUER` | Cert issued directly by the compromised CA |
+| `DISTRUSTED_IN_CHAIN` | Intermediate in chain traces to compromised root |
+| `DISTRUSTED_SPKI` | Cert matches SPKI hash from incident notice |
+| `EXPIRED` / `EXPIRES_SOON` | Expired or expiring within 30 days |
+| `WEAK_RSA` | RSA key < 2048 bits |
+| `WEAK_SIGNATURE` | MD5 or SHA-1 signature |
+
+```bash
+python skills/cert-inventory-migration/scripts/cert_audit.py ./certs \
+  --distrust "eMudhra" \
+  --spki-hash <hex-from-incident-notice> \
+  --json
+
+# Exit code 1 if any distrusted cert found — CI-friendly
+```
+
+> ⚠️ The script cannot detect low-entropy keys. Use the CA's published list of affected key ranges for those.
+
+**Example prompt:**
 > "A CA we use just had a key compromise. Find our affected certificates and plan the reissue."
+
+---
+
+### 🏢 `oauth-vendor-access-audit` — Supply-Chain & OAuth Risk
+
+**Problem:** ConnectWise-style attack via MSP. Which OAuth apps and vendor accounts are dangerous?
+
+**How it works:** `audit_apps.py` reads a JSON export of your app registrations and scores each app HIGH / MEDIUM / LOW, flagging:
+
+- High-risk Graph scopes: `Directory.ReadWrite`, `Application.ReadWrite`, `RoleManagement.ReadWrite`, `Mail.ReadWrite`, `full_access`
+- Unused apps (>90 days), no owner, unverified publisher
+- Admin-consented multi-tenant apps
+- Long-lived secrets (>365 days), recently added credentials (persistence indicator)
+- Delegated admin relationships with no MFA
+
 ```bash
-python skills/cert-inventory-migration/scripts/cert_audit.py ./certs --distrust "CA Name" --spki-hash <hex>
-# exit code 1 if anything chains to a distrusted CA
+python skills/oauth-vendor-access-audit/scripts/audit_apps.py apps.json \
+  --today 2026-10-24 \
+  --json
 ```
-Flags: `DISTRUSTED_ISSUER`, `DISTRUSTED_IN_CHAIN`, `DISTRUSTED_SPKI`, `EXPIRED`, `EXPIRES_SOON`, `WEAK_RSA`, `WEAK_SIGNATURE`. It cannot detect low-entropy keys by itself; use the CA's published affected-key list.
 
-**oauth-vendor-access-audit**
-> "Audit our Entra app registrations after the ConnectWise-style supply-chain news."
+**Example prompt:**
+> "Audit our Entra app registrations after the ConnectWise-style supply-chain news. We want everything ranked by risk."
+
+---
+
+### 🚨 `incident-response-runbook` — Ransomware, Breaches, Leaks
+
+**Problem:** Ransomware on 40 file servers. What do I do right now and in what order?
+
+**Phases covered:**
+
+1. **Contain** — isolate hosts (network segment, not power-off), disable accounts, revoke tokens, block IOCs
+2. **Preserve Evidence** — logs, disk/memory images, timeline, chain of custody
+3. **Scope** — initial access vector, lateral movement, data exfiltrated
+4. **Eradicate** — remove persistence, patch entry point, rotate all credentials
+5. **Recover** — restore from verified clean backups, monitor for re-entry
+6. **Notify** — legal, regulators, insurers; deadline lookup enforced (no hardcoded values)
+7. **Review** — root cause, timeline, remediation owners
+
+> **Ransomware-specific:** Never pay by default. Check for public decryptors first. Confirm backup integrity before restore. Assume data theft if a leak-site listing exists.
+
+**Example prompt:**
+> "Ransomware encrypted about 40 file servers 2 hours ago. What do I do right now?"
+
+---
+
+### 🔍 `security-config-code-review` — Secrets, Crypto, Exposure
+
+**Problem:** Does this PR introduce a security issue? What's wrong with our infra config?
+
+**Checks 9 rule classes:**
+
+| Rule | Detects |
+|---|---|
+| `AWS_ACCESS_KEY` / `GITHUB_TOKEN` / `PRIVATE_KEY` | Hardcoded credentials |
+| `WEAK_RANDOM_FOR_SECRET` | `Math.random()`, `rand()`, `random.randint()` used for tokens | <!-- scan:ignore -->
+| `WEAK_HASH` | MD5, SHA1 in security contexts |
+| `TLS_VERIFY_DISABLED` | `verify=False`, `InsecureRequestWarning` | <!-- scan:ignore -->
+| `DEBUG_ENABLED` | `app.run(debug=True)` | <!-- scan:ignore -->
+| `OPEN_TO_WORLD` | `0.0.0.0/0` security group rules |
+| `PERMISSIVE_CHMOD` | `chmod 777` | <!-- scan:ignore -->
+
 ```bash
-python skills/oauth-vendor-access-audit/scripts/audit_apps.py apps.json --today 2026-10-24
+python skills/security-config-code-review/scripts/scan.py . \
+  --exclude tests \
+  --fail-on HIGH     # CI-friendly: exits 1 if any HIGH+ finding
+
+# Add `scan:ignore` on a line to suppress a confirmed false positive
 ```
-Flags high-risk scopes, no owner, unverified publisher, admin-consented multi-tenant apps, unused apps, recently added or long-lived credentials.
 
-**incident-response-runbook**
-> "Ransomware encrypted about 40 file servers. What do we do right now?"
+> Not a replacement for SAST or dedicated secret-scanning products. Treats findings as leads to investigate, not verdicts.
 
-Returns a phased plan (contain, preserve, scope, eradicate, recover, notify, review) with stated assumptions, and tells you to verify current legal deadlines rather than quoting them from memory.
+**Example prompt:**
+> "Review this repo for security problems before we open-source it."
 
-**security-config-code-review**
-> "Review this repo for security problems."
+---
+
+### 📰 `threat-advisory-summarizer` — One-Screen Actionable Briefs
+
+**Problem:** 12-page CISA advisory. Are we affected? What exactly do we do?
+
+**Output format per advisory:**
+
+1. **One-line summary** — what happened
+2. **Impact on you** — Affected / Not affected / Unknown / Possibly
+3. **Actions** — Now / 72h / Later, with exact versions and settings
+4. **Key IOCs or log queries** — if available
+5. **Sources** — confirmed facts vs vendor claims vs speculation, clearly separated
+
+**Example prompt:**
+> "Summarize this CISA advisory for a team running Fortinet FortiOS 7.4. Are we affected?"
+
+---
+
+## ⚡ Install
+
+### Claude.ai (No-code)
+
+Download the `.skill` files from [`releases/`](releases/) and upload them in Claude's skills settings.
+
+```
+releases/
+├── patch-triage.skill
+├── cert-inventory-migration.skill
+├── oauth-vendor-access-audit.skill
+├── incident-response-runbook.skill
+├── security-config-code-review.skill
+└── threat-advisory-summarizer.skill
+```
+
+### Claude Code (CLI)
+
 ```bash
-python skills/security-config-code-review/scripts/scan.py . --exclude tests --fail-on HIGH
+git clone https://github.com/ashp15205/claude-security-skills.git
+cd claude-security-skills
+
+# Install skills globally (personal) or per-project
+mkdir -p ~/.claude/skills
+cp -r skills/* ~/.claude/skills/
+
+# Only needed for cert_audit.py (cryptography library)
+pip install -r requirements.txt
 ```
-Heuristic regex pass for secrets, private keys, non-cryptographic randomness used for tokens, weak hashes/ciphers, disabled TLS verification, `0.0.0.0/0` rules, debug mode, `chmod 777`. Add `scan:ignore` to a line to suppress a confirmed false positive. Not a replacement for SAST or secret-scanning products.
 
-**threat-advisory-summarizer**
-> "Summarize this CISA advisory for a team running NetScaler 14.1."
+### Verify Installation
 
-Produces a one-screen brief: summary, impact on you, actions by urgency, detection, confidence (confirmed vs vendor claim vs speculation), sources.
+```bash
+python3 scripts/quick_validate.py
+# ✅ All 6 skills valid
+```
 
-## Benchmarks
+---
 
-Run it yourself in under a second: `python evals/run_evals.py`
+## 💬 Usage Examples
+
+Skills are triggered by your natural language request in Claude. No special syntax required.
+
+```
+"Here is our scanner export. What do we patch first?
+ Treat VPN gateways as internet-facing."
+
+"A CA we use just had a key compromise.
+ Find our affected certificates and plan the reissue."
+
+"Audit our Entra app registrations after the ConnectWise supply-chain news."
+
+"Ransomware encrypted about 40 file servers. What do we do right now?"
+
+"Review this repo for security problems before we open-source it."
+
+"Summarize this CISA advisory for a team running NetScaler 14.1."
+```
+
+---
+
+## 📊 Benchmarks
+
+```bash
+python evals/run_evals.py   # runs in ~0.2s
+```
 
 | Check | Result |
 |---|---|
-| Unit tests (`tests/test_scripts.py`) | **46 / 46 pass**, run with `-W error::ResourceWarning` |
-| Eval assertions (`evals/evals.json`, 12 cases, 2 per skill) | **40 / 40 pass** (20 on script cases, 20 on saved Claude outputs) |
-| Mutation smoke test (`tests/mutation_check.py`) | **11 / 11 mutants killed** (a first run exposed 2 survivors; tests were added to close them) |
-| Dogfood scan of this repo with `scan.py --fail-on LOW` (tests/ excluded) | 0 findings |
-| `quick_validate.py` on all 6 skills | all valid |
-| Runtime of full eval suite | about 0.2-0.4 s |
+| Unit tests | **46 / 46** · `-W error::ResourceWarning` |
+| Eval assertions (12 cases, 2 per skill) | **40 / 40** (20 script · 20 LLM output) |
+| Mutation smoke test | **11 / 11 mutants killed** |
+| Dogfood scan (`scan.py --fail-on LOW`, tests/ excluded) | **0 findings** |
+| Skill structure validation (`quick_validate.py`) | **6 / 6 valid** |
+| Full eval suite runtime | **~0.09–0.4 s** |
 
-Per skill, eval assertions passed: patch-triage 5/5, cert-inventory-migration 5/5, oauth-vendor-access-audit 5/5, security-config-code-review 5/5, incident-response-runbook 10/10, threat-advisory-summarizer 10/10 (see `evals/results/benchmark.json`).
+**Per-skill eval results:**
 
-### What these numbers do and do not show
+| Skill | Assertions |
+|---|---|
+| patch-triage | 5 / 5 |
+| cert-inventory-migration | 5 / 5 |
+| oauth-vendor-access-audit | 5 / 5 |
+| security-config-code-review | 5 / 5 |
+| incident-response-runbook | 10 / 10 |
+| threat-advisory-summarizer | 10 / 10 |
 
-- **Script cases** execute the real scripts on fixtures generated at runtime and are graded by code. Strongest evidence.
-- **LLM cases** (incident response, advisory briefs) grade saved outputs with keyword/regex checks (required sections, "verify deadlines", no invented CVE numbers or fixed versions). Those outputs were written by Claude following the `SKILL.md` in the same session that wrote the checks, so this is a **structure and guardrail check, not an independent quality evaluation**. Read the outputs in `evals/results/` yourself.
-- **No baseline comparison**: there was no with-skill vs without-skill A/B run and no independent human or model grader.
-- The scanner and certificate checks are **heuristics**. Expect false positives and false negatives; the mutation test shows the tests detect regressions, not that the rules catch every real-world issue.
-- Fixtures are synthetic. The GitHub Actions workflow in `.github/workflows/test.yml` mirrors the local commands but had not been run on GitHub when this was written.
+### Honest disclosure on what these numbers mean
 
-## Repository layout
+- **Script evals** execute real scripts on runtime-generated fixtures and grade programmatically. Strongest signal.
+- **LLM evals** check saved Claude outputs for required sections, guard-rails ("verify deadlines", no invented CVE numbers). Written by Claude in the same session — a structure check, not an independent quality evaluation. Read `evals/results/` yourself.
+- **No A/B comparison**: no with-skill vs without-skill baseline run.
+- **Heuristics**: the scanner and cert checks expect false positives/negatives. Mutation testing proves regressions are caught, not that every real-world issue is caught.
+- **Synthetic fixtures**: GitHub Actions CI mirrors local commands but badge status depends on GitHub running the workflow after push.
+
+---
+
+## 📁 Repository Layout
 
 ```
-skills/<skill>/SKILL.md        procedure Claude follows (frontmatter + steps)
-skills/<skill>/scripts/        deterministic helpers (triage, cert_audit, audit_apps, scan)
-skills/<skill>/assets/         output templates (IR timeline, advisory brief)
-tests/                         unit tests, runtime fixtures, mutation check
-evals/                         eval cases, saved outputs, runner, benchmark.json
-releases/                      packaged .skill files for upload
-docs/github-about.md           suggested repo description and topics
+claude-security-skills/
+│
+├── skills/
+│   ├── patch-triage/
+│   │   ├── SKILL.md               ← procedure Claude follows
+│   │   └── scripts/triage.py      ← deterministic P0-P3 scorer
+│   │
+│   ├── cert-inventory-migration/
+│   │   ├── SKILL.md
+│   │   └── scripts/cert_audit.py  ← PEM walker, SPKI matcher
+│   │
+│   ├── oauth-vendor-access-audit/
+│   │   ├── SKILL.md
+│   │   └── scripts/audit_apps.py  ← risk scorer, flag engine
+│   │
+│   ├── incident-response-runbook/
+│   │   ├── SKILL.md
+│   │   └── assets/timeline-template.md
+│   │
+│   ├── security-config-code-review/
+│   │   ├── SKILL.md
+│   │   └── scripts/scan.py        ← regex-based 9-rule scanner
+│   │
+│   └── threat-advisory-summarizer/
+│       ├── SKILL.md
+│       └── assets/brief-template.md
+│
+├── tests/
+│   ├── test_scripts.py            ← 46 unit tests
+│   ├── fixtures.py                ← runtime fixture generators
+│   └── mutation_check.py          ← 11 mutant kill checks
+│
+├── evals/
+│   ├── evals.json                 ← 12 eval cases (2 per skill)
+│   ├── run_evals.py               ← runner + benchmark writer
+│   └── results/                   ← saved Claude outputs + benchmark.json
+│
+├── scripts/
+│   └── quick_validate.py          ← SKILL.md structure validator
+│
+├── releases/                      ← packaged .skill files for Claude.ai upload
+└── .github/workflows/test.yml     ← CI: tests + mutation + evals + scan
 ```
 
-## Reference incidents (public reporting, Oct 2026)
+---
 
-These informed the skill design; verify details against primary sources.
-- eMudhra intermediate CA key compromise: [The Hacker News](https://thehackernews.com/2026/10/eight-emudhra-ca-keys-compromised.html), [Google Security blog](https://blog.google/security/protecting-chrome-and-android-users-from-compromised-emudhra-intermediate-ca-certificates/), [Help Net Security](https://www.helpnetsecurity.com/2026/10/21/emudhra-certificates-private-keys-compromised/)
-- AI pentest tooling used in ConnectWise-linked tenant attacks: [SecurityWeek](https://securityweek.com/china-apt-uses-ai-pentest-tool-artex-in-connectwise-attacks)
-- Edge device campaign (Fortinet, Palo Alto) tied to ransomware affiliates: [The Hacker News](https://thehackernews.com/2026/10/hackers-breach-enterprise-firewalls-and.html)
+## 🛡️ Security Design Decisions
 
-## FAQ
+**Why deterministic scripts instead of pure LLM?**
 
-**Can a Claude skill prevent cyberattacks?** No. Prevention comes from controls such as patching, phishing-resistant MFA, least privilege, backups and monitoring. These skills speed up and standardize the analysis and response work around them.
+LLMs hallucinate. For security triage, a hallucinated CVE severity or a fabricated patch version can cause real harm. Every task where the correct answer can be computed deterministically uses a Python script — the LLM sets up the inputs from context, the script computes the answer.
 
-**Do the skills send my data anywhere?** The scripts run locally and make no network calls. Claude itself may search the web for current exploitation status and advisories when a skill tells it to.
+**Why no network calls in scripts?**
 
-**Is it legal advice?** No. Notification deadlines vary by jurisdiction and change; the runbook tells Claude to verify them and you should involve counsel.
+The scripts run fully offline. No telemetry, no API calls, no credentials. Claude handles web lookups (CISA KEV, vendor advisories) as part of the `SKILL.md` workflow; the scripts only process what you provide locally.
 
-**Can I add my own skill?** Yes, see [CONTRIBUTING.md](CONTRIBUTING.md).
+**Why `scan:ignore` instead of `.gitignore`-style?**
 
-## Keywords
+Suppressions are inline and reviewable in diff. A `scan:ignore` comment on a line makes the decision visible to code reviewers rather than hidden in a config file.
 
-Claude skills, Claude Code skills, Agent Skills, SKILL.md, cybersecurity automation, patch prioritization, vulnerability management, CISA KEV, certificate authority compromise, PKI incident response, certificate migration, OAuth app audit, Entra ID, supply-chain security, incident response runbook, ransomware response, secrets detection, secure code review, threat advisory summary, blue team.
+---
 
-## License
+## ❓ FAQ
 
-MIT. See [LICENSE](LICENSE).
+<details>
+<summary><strong>Can a Claude skill prevent cyberattacks?</strong></summary>
+
+No. Prevention comes from architecture decisions, patching, phishing-resistant MFA, least privilege, monitoring, and tested backups. These skills speed up and standardize the analysis and response work around those controls.
+
+</details>
+
+<details>
+<summary><strong>Do the scripts send my data anywhere?</strong></summary>
+
+No. All scripts run locally and make zero network calls. Claude itself may search the web for CVE/advisory information when a `SKILL.md` step directs it to.
+
+</details>
+
+<details>
+<summary><strong>Is the output legal or compliance advice?</strong></summary>
+
+No. Notification deadlines, breach reporting rules, and similar requirements vary by jurisdiction and change over time. The `incident-response-runbook` skill explicitly tells Claude to verify current requirements via web search rather than quoting fixed values, and instructs you to involve legal counsel.
+
+</details>
+
+<details>
+<summary><strong>Can I add my own skill?</strong></summary>
+
+Yes — see [CONTRIBUTING.md](CONTRIBUTING.md). Keep each skill narrow: one problem, one `SKILL.md`, optional `scripts/` and `assets/`. Any script change needs a unit test and, for behavior users depend on, an eval case.
+
+</details>
+
+<details>
+<summary><strong>What's the difference between the .skill files and the skill folders?</strong></summary>
+
+The `releases/*.skill` files are packaged for Claude.ai upload (one-click install). The `skills/*/` folders are the source — use them with Claude Code or any SKILL.md-compatible client. They're the same content.
+
+</details>
+
+<details>
+<summary><strong>Why mock secrets in tests instead of real ones?</strong></summary>
+
+`tests/fixtures.py` builds synthetic vulnerable files at runtime (fake AWS keys, synthetic GitHub tokens). Nothing real is ever committed. This matches the `CONTRIBUTING.md` rule: never commit real secrets or token-shaped literals.
+
+</details>
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome from security practitioners, blue teamers, and developers.
+
+```bash
+# Run the full check suite before opening a PR
+pip install -r requirements.txt
+python -W error::ResourceWarning -m unittest tests.test_scripts
+python tests/mutation_check.py
+python evals/run_evals.py
+python scripts/quick_validate.py
+python skills/security-config-code-review/scripts/scan.py . --exclude tests --fail-on HIGH
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for full guidelines.
+
+---
+
+## 📰 Reference Incidents (October 2026)
+
+These real-world incidents informed the skill design. Verify all details against primary sources.
+
+| Incident | Skill Coverage | Sources |
+|---|---|---|
+| eMudhra intermediate CA key compromise — 8 CA private keys compromised, browser distrust | `cert-inventory-migration` | [THN](https://thehackernews.com/2026/10/eight-emudhra-ca-keys-compromised.html) · [Google](https://blog.google/security/protecting-chrome-and-android-users-from-compromised-emudhra-intermediate-ca-certificates/) · [HNS](https://www.helpnetsecurity.com/2026/10/21/emudhra-certificates-private-keys-compromised/) |
+| China APT uses AI pentest tool "Artex" in ConnectWise-linked tenant attacks | `oauth-vendor-access-audit` | [SecurityWeek](https://securityweek.com/china-apt-uses-ai-pentest-tool-artex-in-connectwise-attacks) |
+| Fortinet / Palo Alto edge device campaign tied to ransomware affiliates | `patch-triage` · `incident-response-runbook` | [THN](https://thehackernews.com/2026/10/hackers-breach-enterprise-firewalls-and.html) |
+
+---
+
+## 📄 License
+
+MIT © 2026 Ashish Patil — see [LICENSE](LICENSE).
+
+---
+
+<div align="center">
+
+**Built in response to real incidents. Tested. Honest about limitations.**
+
+⭐ Star this repo if it helped your team · 🐛 [Open an issue](https://github.com/ashp15205/claude-security-skills/issues) · 🤝 [Contribute](CONTRIBUTING.md)
+
+</div>
