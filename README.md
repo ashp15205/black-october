@@ -9,12 +9,13 @@
 [![Mutants Killed](https://img.shields.io/badge/mutants%20killed-11%2F11-brightgreen?style=for-the-badge)](tests/mutation_check.py)
 [![License](https://img.shields.io/badge/license-MIT-blue?style=for-the-badge)](LICENSE)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue?style=for-the-badge&logo=python)](requirements.txt)
-[![Claude](https://img.shields.io/badge/Claude-Code%20%7C%20.ai-orange?style=for-the-badge)](https://claude.ai)
+[![Supported Tools](https://img.shields.io/badge/Works%20With-Claude%20%7C%20Cursor%20%7C%20Windsurf%20%7C%20Copilot%20%7C%20Cline%20%7C%20Aider-blueviolet?style=for-the-badge)](#-supported-tools--platforms)
 
-<p>Works with <strong>Claude.ai</strong>, <strong>Claude Code</strong>, and any client that supports <a href="https://docs.claude.com"><code>SKILL.md</code> Agent Skills</a>.<br/>
+<p>Works with <strong>Claude.ai</strong>, <strong>Claude Code</strong>, <strong>Cursor</strong>, <strong>Windsurf</strong>, <strong>GitHub Copilot</strong>, <strong>Cline</strong>, <strong>Roo Code</strong>, <strong>Aider</strong>, <strong>Google Antigravity</strong>, and any client that supports <a href="https://docs.claude.com"><code>SKILL.md</code> Agent Skills</a> (plus standalone CLI & CI/CD).<br/>
 Minimum dependency footprint: Python 3 stdlib · <code>cryptography</code> (cert audit only)</p>
 
 <a href="#-the-six-skills">Skills</a> ·
+<a href="#-supported-tools--platforms">Supported Tools</a> ·
 <a href="#-install">Install</a> ·
 <a href="#-usage-examples">Usage</a> ·
 <a href="#-benchmarks">Benchmarks</a> ·
@@ -244,6 +245,24 @@ python skills/security-config-code-review/scripts/scan.py . \
 
 ## ⚡ Install
 
+### 🛠️ Supported Tools & Platforms
+
+Because every skill follows the open **`SKILL.md`** specification and includes standalone Python CLI scripts, this repo works across all major AI agent clients and IDEs:
+
+| Tool / Client | Support Level | How to Use |
+|---|---|---|
+| **Claude Code** | Native Agent Skill | Copy to `~/.claude/skills/` (global) or `.claude/skills/` (repo-level) |
+| **Claude.ai** | 1-Click Upload | Download `.skill` bundles from [`releases/`](releases/) and upload in Claude Settings |
+| **Cursor** | Native / Rules | Copy to `.cursor/skills/` or reference `SKILL.md` in `.cursorrules` |
+| **Windsurf** | Native / Cascade | Reference `SKILL.md` in `.windsurfrules` or project workflows |
+| **GitHub Copilot** | Agent Mode | Reference in `.github/copilot-instructions.md` or Copilot Chat prompt |
+| **Cline / Roo Code** | Custom Instructions | Add `SKILL.md` path to Custom System Instructions or `.clinerules` |
+| **Aider** | Pair Programming | Run `aider --read skills/<skill-name>/SKILL.md` |
+| **Google Antigravity** | Workspace Skills | Copy to `.agents/skills/` or `~/.gemini/config/skills/` |
+| **CLI & CI/CD** | Deterministic Scripts | Run directly in terminal, GitHub Actions, or GitLab CI (no LLM required) |
+
+---
+
 ### Claude.ai (No-code)
 
 Download the `.skill` files from [`releases/`](releases/) and upload them in Claude's skills settings.
@@ -271,6 +290,23 @@ cp -r skills/* ~/.claude/skills/
 # Only needed for cert_audit.py (cryptography library)
 pip install -r requirements.txt
 ```
+
+### Cursor & Windsurf
+
+```bash
+# Cursor: Add to project skills directory or .cursorrules
+mkdir -p .cursor/skills
+cp -r skills/* .cursor/skills/
+
+# Windsurf: Reference skills/<name>/SKILL.md in .windsurfrules
+```
+
+### GitHub Copilot, Cline, Roo Code & Aider
+
+- **GitHub Copilot**: Reference the relevant `skills/<skill-name>/SKILL.md` in `.github/copilot-instructions.md` or in your prompt.
+- **Cline / Roo Code**: Add skill paths into your system instructions or `.clinerules`.
+- **Aider**: Pass `--read skills/<skill-name>/SKILL.md` when launching aider.
+- **Standalone CLI / CI/CD**: Run Python helper scripts (`scan.py`, `cert_audit.py`, `audit_apps.py`) directly with `--json` in CI workflows.
 
 ### Verify Installation
 
@@ -431,6 +467,13 @@ No. Notification deadlines, breach reporting rules, and similar requirements var
 <summary><strong>Can I add my own skill?</strong></summary>
 
 Yes — see [CONTRIBUTING.md](CONTRIBUTING.md). Keep each skill narrow: one problem, one `SKILL.md`, optional `scripts/` and `assets/`. Any script change needs a unit test and, for behavior users depend on, an eval case.
+
+</details>
+
+<details>
+<summary><strong>Does this only work with Claude?</strong></summary>
+
+No! While named for its original development environment and Claude.ai `.skill` packaging, every skill is built on the open `SKILL.md` agent format. It works seamlessly with **Claude.ai**, **Claude Code**, **Cursor**, **Windsurf**, **GitHub Copilot**, **Cline**, **Roo Code**, **Aider**, **Google Antigravity**, and any tool that reads instructions. Furthermore, all deterministic helper scripts (`scan.py`, `cert_audit.py`, `audit_apps.py`) run completely standalone in your terminal or CI/CD pipelines without requiring any AI assistant.
 
 </details>
 
