@@ -1,0 +1,182 @@
+{
+  "assertions_passed": 40,
+  "assertions_total": 40,
+  "pass_rate": 1.0,
+  "by_skill": {
+    "patch-triage": {
+      "passed": 5,
+      "total": 5
+    },
+    "cert-inventory-migration": {
+      "passed": 5,
+      "total": 5
+    },
+    "oauth-vendor-access-audit": {
+      "passed": 5,
+      "total": 5
+    },
+    "security-config-code-review": {
+      "passed": 5,
+      "total": 5
+    },
+    "incident-response-runbook": {
+      "passed": 10,
+      "total": 10
+    },
+    "threat-advisory-summarizer": {
+      "passed": 10,
+      "total": 10
+    }
+  },
+  "cases": [
+    {
+      "id": "triage-1",
+      "skill": "patch-triage",
+      "type": "script",
+      "results": {
+        "first_row_is_P0": true,
+        "markdown_header": true,
+        "low_internal_is_P3": true,
+        "edge_bump_applied": true
+      },
+      "passed": 4,
+      "total": 4
+    },
+    {
+      "id": "triage-2",
+      "skill": "patch-triage",
+      "type": "script",
+      "results": {
+        "errors_clearly_on_bad_input": true
+      },
+      "passed": 1,
+      "total": 1
+    },
+    {
+      "id": "cert-1",
+      "skill": "cert-inventory-migration",
+      "type": "script",
+      "results": {
+        "distrusted_flagged": true,
+        "clean_not_flagged": true,
+        "exit_code_1": true,
+        "expired_and_weak_detected": true
+      },
+      "passed": 4,
+      "total": 4
+    },
+    {
+      "id": "cert-2",
+      "skill": "cert-inventory-migration",
+      "type": "script",
+      "results": {
+        "exit_code_0": true
+      },
+      "passed": 1,
+      "total": 1
+    },
+    {
+      "id": "oauth-1",
+      "skill": "oauth-vendor-access-audit",
+      "type": "script",
+      "results": {
+        "msp_high": true,
+        "hr_low": true,
+        "stale_flags": true,
+        "sorted_by_risk": true
+      },
+      "passed": 4,
+      "total": 4
+    },
+    {
+      "id": "oauth-2",
+      "skill": "oauth-vendor-access-audit",
+      "type": "script",
+      "results": {
+        "errors_clearly_on_bad_input": true
+      },
+      "passed": 1,
+      "total": 1
+    },
+    {
+      "id": "code-1",
+      "skill": "security-config-code-review",
+      "type": "script",
+      "results": {
+        "finds_9_rule_classes": true,
+        "critical_first": true,
+        "fail_on_exit_1": true
+      },
+      "passed": 3,
+      "total": 3
+    },
+    {
+      "id": "code-2",
+      "skill": "security-config-code-review",
+      "type": "script",
+      "results": {
+        "zero_findings": true,
+        "fail_on_exit_0": true
+      },
+      "passed": 2,
+      "total": 2
+    },
+    {
+      "id": "ir-1",
+      "skill": "incident-response-runbook",
+      "type": "llm",
+      "results": {
+        "has_contain_preserve_notify": true,
+        "isolate_not_poweroff": true,
+        "backups_verified": true,
+        "deadlines_marked_verify": true,
+        "no_pay_default": true,
+        "assumptions_stated": true
+      },
+      "passed": 6,
+      "total": 6
+    },
+    {
+      "id": "ir-2",
+      "skill": "incident-response-runbook",
+      "type": "llm",
+      "results": {
+        "has_contain_preserve_notify": true,
+        "logs_preserved": true,
+        "deadlines_marked_verify": true,
+        "assumptions_stated": true
+      },
+      "passed": 4,
+      "total": 4
+    },
+    {
+      "id": "adv-1",
+      "skill": "threat-advisory-summarizer",
+      "type": "llm",
+      "results": {
+        "brief_sections": true,
+        "impact_verdict": true,
+        "separates_vendor_claims": true,
+        "has_sources": true,
+        "no_unsupported_cve": true
+      },
+      "passed": 5,
+      "total": 5
+    },
+    {
+      "id": "adv-2",
+      "skill": "threat-advisory-summarizer",
+      "type": "llm",
+      "results": {
+        "brief_sections": true,
+        "impact_verdict": true,
+        "no_invented_fixed_version": true,
+        "has_sources": true,
+        "single_source_flagged": true
+      },
+      "passed": 5,
+      "total": 5
+    }
+  ],
+  "seconds": 0.09
+}
