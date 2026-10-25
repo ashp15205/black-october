@@ -1,1 +1,1 @@
-"""Test package for claude-security-skills."""
+"""Test package for black-october."""

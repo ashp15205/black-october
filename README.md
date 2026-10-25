@@ -96,7 +96,7 @@ Sources: [The Hacker News](https://thehackernews.com/2026/10/hackers-breach-ente
 | 🔧 **Security Engineers** | Audit certificate estates and OAuth app registrations systematically |
 | 🏗️ **DevSecOps / Developers** | First-pass code and config security review before formal SAST |
 | 🏢 **IT / Platform Admins** | Own patching, PKI, and SaaS access; respond to CA distrust or supply-chain alerts |
-| 👥 **Small Teams** | No dedicated security staff? Get a repeatable baseline process that Claude can walk you through |
+| 👥 **Small Teams** | No dedicated security staff? Get a repeatable baseline process that your AI assistant can walk you through |
 | 🤝 **MSPs / Vendor-Risk Owners** | Audit third-party OAuth access and delegated admin relationships |
 
 ---
@@ -111,7 +111,7 @@ Sources: [The Hacker News](https://thehackernews.com/2026/10/hackers-breach-ente
 
 **Problem:** Scanner dumps 400 CVEs. Which 3 need a P0 response tonight?
 
-**How it works:** Claude searches live sources (CISA KEV, vendor advisories) for exploitation status, then the `triage.py` script applies deterministic priority rules:
+**How it works:** Your AI agent searches live sources (CISA KEV, vendor advisories) for exploitation status, then the `triage.py` script applies deterministic priority rules:
 
 | Condition | Priority | Deadline |
 |---|---|---|
@@ -292,8 +292,8 @@ releases/
 ### Claude Code (CLI)
 
 ```bash
-git clone https://github.com/ashp15205/claude-security-skills.git
-cd claude-security-skills
+git clone https://github.com/ashp15205/black-october.git
+cd black-october
 
 # Install skills globally (personal) or per-project
 mkdir -p ~/.claude/skills
@@ -331,7 +331,7 @@ python3 scripts/quick_validate.py
 
 ## 💬 Usage Examples
 
-Skills are triggered by your natural language request in Claude. No special syntax required.
+Skills are triggered by your natural language request in your AI agent (Claude, Cursor, Copilot, etc.). No special syntax required.
 
 ```
 "Here is our scanner export. What do we patch first?
@@ -390,7 +390,7 @@ python evals/run_evals.py   # runs in ~0.2s
 ## 📁 Repository Layout
 
 ```
-claude-security-skills/
+black-october/
 │
 ├── skills/
 │   ├── patch-triage/
@@ -455,7 +455,7 @@ Suppressions are inline and reviewable in diff. A `scan:ignore` comment on a lin
 ## ❓ FAQ
 
 <details>
-<summary><strong>Can a Claude skill prevent cyberattacks?</strong></summary>
+<summary><strong>Can an AI agent skill prevent cyberattacks?</strong></summary>
 
 No. Prevention comes from architecture decisions, patching, phishing-resistant MFA, least privilege, monitoring, and tested backups. These skills speed up and standardize the analysis and response work around those controls.
 
@@ -483,9 +483,9 @@ Yes — see [CONTRIBUTING.md](CONTRIBUTING.md). Keep each skill narrow: one prob
 </details>
 
 <details>
-<summary><strong>Does this only work with Claude?</strong></summary>
+<summary><strong>Does Black October only work with Claude?</strong></summary>
 
-No! While named for its original development environment and Claude.ai `.skill` packaging, every skill is built on the open `SKILL.md` agent format. It works seamlessly with **Claude.ai**, **Claude Code**, **Cursor**, **Windsurf**, **GitHub Copilot**, **Cline**, **Roo Code**, **Aider**, **Google Antigravity**, and any tool that reads instructions. Furthermore, all deterministic helper scripts (`scan.py`, `cert_audit.py`, `audit_apps.py`) run completely standalone in your terminal or CI/CD pipelines without requiring any AI assistant.
+No! While originally named for its early development environment and Claude.ai `.skill` packaging, every skill is built on the open `SKILL.md` agent format. It works seamlessly with **Claude.ai**, **Claude Code**, **Cursor**, **Windsurf**, **GitHub Copilot**, **Cline**, **Roo Code**, **Aider**, **Google Antigravity**, and any tool that reads instructions. Furthermore, all deterministic helper scripts (`scan.py`, `cert_audit.py`, `audit_apps.py`) run completely standalone in your terminal or CI/CD pipelines without requiring any AI assistant.
 
 </details>
 
@@ -545,6 +545,6 @@ MIT © 2026 Ashish Patil — see [LICENSE](LICENSE).
 
 **Built in response to real incidents. Tested. Honest about limitations.**
 
-⭐ Star this repo if it helped your team · 🐛 [Open an issue](https://github.com/ashp15205/claude-security-skills/issues) · 🤝 [Contribute](CONTRIBUTING.md)
+⭐ Star this repo if it helped your team · 🐛 [Open an issue](https://github.com/ashp15205/black-october/issues) · 🤝 [Contribute](CONTRIBUTING.md)
 
 </div>

@@ -1,13 +1,13 @@
 # GitHub "About" settings
 
-**Repository name:** `claude-security-skills`
+**Repository name:** `black-october`
 
 **Description (<=350 chars):**
-Six tested Claude Agent Skills for security teams: patch triage, CA/certificate migration, OAuth & vendor access audit, incident response runbooks, code/config security review and threat-advisory briefs. Python helpers, 46 unit tests, eval benchmarks.
+Black October: Production-tested security skills for Claude Code, Cursor, Copilot & AI agents. Real-world patch triage, CA migration, OAuth audit, and IR runbooks.
 
 **Website:** (optional) link to your profile or blog
 
 **Topics (20):**
-claude, claude-skills, agent-skills, anthropic, claude-code, cybersecurity, security-automation, incident-response, vulnerability-management, patch-management, certificate-management, pki, oauth-security, devsecops, threat-intelligence, secrets-detection, ransomware, blue-team, sast, ai-security
+black-october, cybersecurity, security-automation, ai-agents, agent-skills, claude-code, cursor, copilot, incident-response, vulnerability-management, patch-management, pki, oauth-security, devsecops, threat-intelligence, secrets-detection, ransomware, blue-team, sast, infosec
 
-**Social preview text:** "Claude skills for patch triage, cert migration, OAuth audits, IR and code review."
+**Social preview text:** "Black October: Security skills for AI agents and engineers."
