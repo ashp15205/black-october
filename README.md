@@ -1,8 +1,12 @@
 <div align="center">
 
-<h1>🛡️ Claude Security Skills</h1>
+<h1>🛡️ Black October</h1>
 
-<p><strong>Six production-tested Claude Agent Skills for security teams.<br/>Patch triage · CA migration · OAuth audit · Incident response · Code review · Threat briefs</strong></p>
+<p><strong>Production-tested Security Skills for AI Agents & Engineers<br/>Patch triage · CA migration · OAuth audit · Incident response · Code review · Threat briefs</strong></p>
+
+<p align="center">
+  <img src="assets/images/hero-banner.jpg" alt="Black October Security Skills Hero" width="100%" />
+</p>
 
 [![Unit Tests](https://img.shields.io/badge/unit%20tests-46%20%E2%9C%93-brightgreen?style=for-the-badge&logo=python)](tests/test_scripts.py)
 [![Eval Assertions](https://img.shields.io/badge/eval%20assertions-40%2F40-brightgreen?style=for-the-badge)](evals/evals.json)
@@ -19,7 +23,7 @@ Minimum dependency footprint: Python 3 stdlib · <code>cryptography</code> (cert
 <a href="#-install">Install</a> ·
 <a href="#-usage-examples">Usage</a> ·
 <a href="#-benchmarks">Benchmarks</a> ·
-<a href="#-what-triggered-this">Motivation</a> ·
+<a href="#-black-october-what-triggered-this">Motivation</a> ·
 <a href="#-faq">FAQ</a> ·
 <a href="CONTRIBUTING.md">Contributing</a>
 
@@ -31,15 +35,19 @@ Minimum dependency footprint: Python 3 stdlib · <code>cryptography</code> (cert
 
 AI cannot block attacks. But AI can **speed up the repeatable analysis work around security operations** — the parts where humans forget steps under pressure, prioritize wrong, or get overwhelmed by volume.
 
-This repo pairs **six written `SKILL.md` procedures** (instructions Claude follows like a senior analyst) with **deterministic Python helper scripts** (where the output must be reproducible and auditable). Every helper is covered by unit tests, eval assertions, and mutation testing.
+This repo pairs **six written `SKILL.md` procedures** (instructions agents follow like a senior analyst) with **deterministic Python helper scripts** (where the output must be reproducible and auditable). Every helper is covered by unit tests, eval assertions, and mutation testing.
 
-> **Rule of thumb:** if Claude's output must be reproducible, it goes through a script. If it requires judgment and synthesis, it goes through a `SKILL.md`.
+> **Rule of thumb:** if an agent's output must be reproducible, it goes through a script. If it requires judgment and synthesis, it goes through a `SKILL.md`.
 
 ---
 
-## 🔥 What Triggered This
+## 🔥 Black October: What Triggered This
 
-In the **72 hours before October 24, 2026**, three unconnected incidents demonstrated the exact failure modes these skills are designed around:
+<p align="center">
+  <img src="assets/images/incident-radar.jpg" alt="Black October Threat Radar" width="100%" />
+</p>
+
+In the **72 hours before October 24, 2026** ("Black October"), three unconnected incidents demonstrated the exact failure modes these skills are designed around:
 
 <details>
 <summary><strong>1. 🔑 eMudhra intermediate CA key compromise — cert-inventory-migration</strong></summary>
@@ -94,6 +102,10 @@ Sources: [The Hacker News](https://thehackernews.com/2026/10/hackers-breach-ente
 ---
 
 ## 🔧 The Six Skills
+
+<p align="center">
+  <img src="assets/images/skills-execution.jpg" alt="AI Agent Security Skills Dual-Screen Execution" width="100%" />
+</p>
 
 ### 🩹 `patch-triage` — Deterministic CVE Prioritization
 
